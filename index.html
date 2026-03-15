@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horário de Provas</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #020408;
+    --blue-core: #0a4aff;
+    --blue-glow: #1e90ff;
+    --blue-light: #60b4ff;
+    --blue-ice: #a8d8ff;
+    --cyan-accent: #00e5ff;
+    --grid-line: rgba(10, 74, 255, 0.12);
+    --card-bg: rgba(4, 20, 50, 0.7);
+    --card-border: rgba(30, 144, 255, 0.25);
+    --text-primary: #e8f4ff;
+    --text-muted: rgba(168, 216, 255, 0.55);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(10,74,255,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 80%, rgba(0,229,255,0.10) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(10,74,255,0.06) 0%, transparent 70%);
+    animation: bgPulse 8s ease-in-out infinite alternate;
+    z-index: 0;
+  }
+  @keyframes bgPulse { 0% { opacity:.7 } 100% { opacity:1 } }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    z-index: 0;
+    animation: gridMove 20s linear infinite;
+  }
+  @keyframes gridMove { 0% { background-position:0 0 } 100% { background-position:48px 48px } }
+
+  .wrapper {
+    position: relative; z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown .8s ease both;
+  }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-24px) } to { opacity:1; transform:translateY(0) } }
+
+  .label-tag {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; letter-spacing: 4px;
+    color: var(--cyan-accent);
+    text-transform: uppercase;
+    border: 1px solid rgba(0,229,255,.3);
+    padding: 4px 14px; border-radius: 2px;
+    margin-bottom: 18px;
+    animation: blink 3s step-end infinite;
+  }
+  @keyframes blink {
+    0%,100% { border-color:rgba(0,229,255,.3) }
+    50%      { border-color:rgba(0,229,255,.8); box-shadow:0 0 8px rgba(0,229,255,.4) }
+  }
+
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(26px,5vw,42px);
+    font-weight: 900; letter-spacing: 2px; line-height: 1.1;
+    background: linear-gradient(135deg, #fff 0%, var(--blue-light) 50%, var(--cyan-accent) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px; color: var(--text-muted); letter-spacing: 2px;
+  }
+
+  .btn-download {
+    display: inline-flex; align-items: center; gap: 9px;
+    margin-top: 22px; padding: 10px 22px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--bg-deep);
+    background: linear-gradient(135deg, var(--blue-glow), var(--cyan-accent));
+    border: none; border-radius: 3px; cursor: pointer;
+    transition: box-shadow .3s, transform .2s, opacity .2s;
+  }
+  .btn-download:hover { box-shadow: 0 0 24px rgba(0,229,255,.5); transform: translateY(-2px); }
+  .btn-download:active { transform: translateY(0); opacity: .85; }
+  .btn-download svg { width:15px; height:15px; flex-shrink:0; }
+  .btn-secondary {
+    background: transparent;
+    color: var(--cyan-accent);
+    border: 1px solid rgba(0,229,255,.5);
+  }
+  .btn-secondary:hover { box-shadow: 0 0 24px rgba(0,229,255,.3); background: rgba(0,229,255,.07); }
+
+  /* SECTION TITLES */
+  .section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 5px; text-transform: uppercase;
+    color: var(--blue-glow);
+    margin: 44px 0 14px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-title::after {
+    content: ''; flex:1; height:1px;
+    background: linear-gradient(90deg, rgba(30,144,255,.5), transparent);
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: 108px 130px 1fr auto;
+    align-items: start;
+    gap: 16px;
+    position: relative; overflow: hidden;
+    backdrop-filter: blur(8px);
+    transition: border-color .3s, box-shadow .3s, transform .3s;
+    animation: fadeUp .5s ease both;
+  }
+  .card::before {
+    content: ''; position: absolute; left:0; top:0; bottom:0; width:3px;
+    background: linear-gradient(180deg, var(--blue-core), var(--cyan-accent));
+    opacity: 0; transition: opacity .3s;
+  }
+  .card:hover { border-color:rgba(30,144,255,.55); box-shadow:0 0 28px rgba(10,74,255,.18),inset 0 0 20px rgba(10,74,255,.05); transform:translateX(4px); }
+  .card:hover::before { opacity:1; }
+  .card::after {
+    content:''; position:absolute; inset:0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.03) 50%, transparent 60%);
+    transform: translateX(-100%); transition: transform .5s ease;
+  }
+  .card:hover::after { transform:translateX(100%); }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:translateY(0) } }
+  .card:nth-child(1)  { animation-delay:.05s }
+  .card:nth-child(2)  { animation-delay:.10s }
+  .card:nth-child(3)  { animation-delay:.15s }
+  .card:nth-child(4)  { animation-delay:.20s }
+  .card:nth-child(5)  { animation-delay:.25s }
+  .card:nth-child(6)  { animation-delay:.30s }
+  .card:nth-child(7)  { animation-delay:.35s }
+  .card:nth-child(8)  { animation-delay:.40s }
+  .card:nth-child(9)  { animation-delay:.45s }
+  .card:nth-child(10) { animation-delay:.50s }
+
+  /* Date block */
+  .date-block { display:flex; flex-direction:column; padding-top:2px; }
+  .date-main  { font-family:'Orbitron',sans-serif; font-size:20px; font-weight:700; color:#fff; line-height:1; }
+  .date-day   { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--text-muted); letter-spacing:1px; margin-top:5px; }
+
+  /* Aulas block */
+  .aulas-block {
+    display: flex; flex-direction: column; padding-top: 3px;
+    border-left: 1px solid rgba(30,144,255,.2);
+    padding-left: 14px;
+  }
+  .aulas-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 5px;
+  }
+  .aulas-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--cyan-accent);
+    line-height: 1.5;
+  }
+  .aulas-none {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px; color: rgba(255,255,255,.2);
+  }
+
+  /* Subjects */
+  .subjects   { display:flex; flex-direction:column; gap:5px; padding-top:2px; }
+  .subject-item { font-size:14px; font-weight:400; color:var(--blue-ice); line-height:1.4; }
+  .subject-detail { font-family:'Share Tech Mono',monospace; font-size:11px; color:rgba(0,229,255,.4); display:block; margin-top:1px; }
+
+  /* Second call */
+  .second-call { text-align:right; flex-shrink:0; padding-top:2px; }
+  .call-label  { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--text-muted); text-transform:uppercase; display:block; margin-bottom:4px; }
+  .call-date   { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:700; color:var(--blue-glow); }
+  .call-time   { font-family:'Share Tech Mono',monospace; font-size:11px; color:rgba(96,180,255,.6); display:block; margin-top:2px; }
+  .no-call     { font-family:'Share Tech Mono',monospace; font-size:11px; color:rgba(255,255,255,.15); letter-spacing:1px; }
+
+  footer {
+    text-align:center; margin-top:60px;
+    font-family:'Share Tech Mono',monospace; font-size:11px;
+    color:rgba(96,180,255,.2); letter-spacing:3px;
+  }
+
+  @media (max-width:700px) {
+    .card { grid-template-columns: 90px 1fr; grid-template-rows: auto auto auto; }
+    .aulas-block { border-left:none; padding-left:0; border-top:1px solid rgba(30,144,255,.2); padding-top:10px; margin-top:2px; grid-column:1/-1; }
+    .second-call { grid-column:1/-1; text-align:left; border-top:1px solid rgba(30,144,255,.2); padding-top:10px; margin-top:2px; }
+    .date-main { font-size:17px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="label-tag">// SISTEMA DE PROVAS //</div>
+    <h1>HORÁRIO DE PROVAS</h1>
+    <p class="subtitle">1ª &amp; 2ª Chamada &nbsp;·&nbsp; 2025</p>
+    <br>
+    <a class="btn-download" href="https://drive.google.com/uc?export=download&id=1mfAClWM0c5-92DZzSC-LtRGZBBA6Gbyj" target="_blank" rel="noopener" style="margin-top:22px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Baixar Cronograma (PDF)
+    </a>
+  </header>
+
+  <!-- PRÉ-PERÍODO -->
+  <div class="section-title">Pré-Período</div>
+
+  <div class="card">
+    <div class="date-block"><span class="date-main">27/02</span><span class="date-day">Sexta</span></div>
+    <div class="aulas-block"><span class="aulas-label">1ª Chamada</span><span class="aulas-value">1ª, 2ª e 3ª aulas</span></div>
+    <div class="subjects">
+      <span class="subject-item">Simulado — Produção de Texto</span>
+    </div>
+    <div class="second-call">
+      <span class="call-label">2ª Chamada</span>
+      <span class="call-date">06/03</span>
+      <span class="call-time">13h30 – 16h30</span>
+    </div>
+  </div>
+
+  <!-- SEMANA 1 -->
+  <div class="section-title">Semana 1 — 16 a 20 Mar</div>
+
+  <div class="card">
+    <div class="date-block"><span class="date-main">16/03</span><span class="date-day">Segunda</span></div>
+    <div class="aulas-block"><span class="aulas-label">1ª Chamada</span><span class="aulas-value">1ª e 2ª aulas</span></div>
+    <div class="subjects">
+      <span class="subject-item">Língua Portuguesa<span class="subject-detail">Gramática e Literatura</span></span>
+      <span class="subject-item">Sociologia</span>
+    </div>
+    <div class="second-call">
+      <span class="call-label">2ª Chamada</span>
+      <span class="call-date">23/03</span>
+      <span class="call-time">13h30 – 15h10</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="date-block"><span class="date-main">17/03</span><span class="date-day">Terça</span></div>
+    <div class="aulas-block"><span class="aulas-label">1ª Chamada</span><span class="aulas-value">1ª, 2ª e 3ª aulas</span></div>
+    <div class="subjects">
+      <span class="subject-item">Arte</span>
+      <span class="subject-item">Inglês</span>
+      <span class="subject-item">Química Eletiva</span>
+    </div>
+    <div class="second-call">
+      <span class="call-label">2ª Chamada</span>
+      <span class="call-date">24/03</span>
+      <span class="call-time">13h30 – 16h00</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="date-block"><span class="date-main">18/03</span><span class="date-day">Quarta</span></div>
+    <div class="aulas-block"><span class="aulas-label">1ª Chamada</span><span class="aulas-value">1ª e 2ª aulas</span></div>
+    <div class="subjects">
+      <span class="subject-item">Geografia</span>
+      <span class="subject-item">Est. Orientado de Língua Portuguesa</span>
+    </div>
+    <div class="second-call">
+      <span class="call-label">2ª Chamada</span>
+      <span class="call-date">25/03</span>
+      <span class="call-time">13h30 – 15h10</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="date-block"><span class="date-main">19/03</span><span class="date-day">Quinta</span></div>
+    <div class="aulas-block"><span class="aulas-label">1ª Chamada</span><span class="aulas-none">——</span></div>
+    <div class="subjects">
+      <span class="subject-item">Olimpíada Canguru</span>
+    </div>
+    <div class="second-call"><span class="no-call">——</span></div>
+  </div>
+
+  <div class="card">
+    <div class="date-block"><span class="date-main">20/03</span><span class="date-day">Sexta</span></div>
+    <div class="aulas-block"><span class="aulas-label">1ª Chamada</span><span class="aulas-value">1ª e 2ª aulas</span></div>
+    <div class="subjects">
+      <span class="subject-item">História</span>
+      <span class="subject-item">Química</span>
+    </div>
+    <div class="second-call">
+      <span class="call-label">2ª Chamada</span>
+      <span class="call-date">26/03</span>
+      <span class="call-time">13h30 – 15h10</span>
+    </div>
+  </div>
+
+  <!-- SEMANA 2 -->
+  <div class="section-title">Semana 2 — 23 a 27 Mar</div>
+
+  <div class="card">
+    <div class="date-block"><span class="date-main">23/03</span><span class="date-day">Segunda</span></div>
+    <div class="aulas-block"><span class="aulas-label">1ª Chamada</span><span class="aulas-value">1ª e 2ª aulas</span></div>
+    <div class="subjects">
+      <span class="subject-item">Est. Orientado Matemática</span>
+      <span class="subject-item">Educação Física</span>
+    </div>
+    <div class="second-call">
+      <span class="call-label">2ª Chamada</span>
+      <span class="call-date">27/03</span>
+      <span class="call-time">13h30 – 15h10</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="date-block"><span class="date-main">24/03</span><span class="date-day">Terça</span></div>
+    <div class="aulas-block"><span class="aulas-label">1ª Chamada</span><span class="aulas-value">1ª e 2ª aulas</span></div>
+    <div class="subjects">
+      <span class="subject-item">Biologia</span>
+      <span class="subject-item">Física</span>
+    </div>
+    <div class="second-call">
+      <span class="call-label">2ª Chamada</span>
+      <span class="call-date">30/03</span>
+      <span class="call-time">13h30 – 15h10</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="date-block"><span class="date-main">25/03</span><span class="date-day">Quarta</span></div>
+    <div class="aulas-block"><span class="aulas-label">1ª Chamada</span><span class="aulas-value">1ª, 2ª e 3ª aulas</span></div>
+    <div class="subjects">
+      <span class="subject-item">Filosofia</span>
+      <span class="subject-item">Matemática</span>
+      <span class="subject-item">Civismo e Cidadania</span>
+    </div>
+    <div class="second-call">
+      <span class="call-label">2ª Chamada</span>
+      <span class="call-date">31/03</span>
+      <span class="call-time">13h30 – 16h00</span>
+    </div>
+  </div>
+
+  <!-- PÓS-PERÍODO -->
+  <div class="section-title">Pós-Período</div>
+
+  <div class="card">
+    <div class="date-block"><span class="date-main">27/03</span><span class="date-day">Sexta</span></div>
+    <div class="aulas-block"><span class="aulas-label">1ª Chamada</span><span class="aulas-value">2ª, 3ª, 4ª, 5ª<br>e 6ª aulas</span></div>
+    <div class="subjects">
+      <span class="subject-item">Simulado — Conhecimentos Gerais</span>
+    </div>
+    <div class="second-call">
+      <span class="call-label">2ª Chamada</span>
+      <span class="call-date">06/04</span>
+      <span class="call-time">13h30 – 16h30</span>
+    </div>
+  </div>
+
+  <footer>// END OF SCHEDULE // BONS ESTUDOS //</footer>
+</div>
+
+<script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+<script>
+async function downloadDocx() {
+  const btn = document.querySelector('.btn-download');
+  const original = btn.innerHTML;
+  btn.innerHTML = 'Gerando documento...';
+  btn.style.opacity = '0.7';
+
+  try {
+    const {
+      Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+      AlignmentType, BorderStyle, WidthType, ShadingType, VerticalAlign
+    } = docx;
+
+    const dxa = (cm) => Math.round(cm * 567);
+    const bdr = (color, size) => ({ style: BorderStyle.SINGLE, size, color });
+    const cellBorders = { top: bdr("AAAAAA",4), bottom: bdr("AAAAAA",4), left: bdr("AAAAAA",4), right: bdr("AAAAAA",4) };
+    const headBorders = { top: bdr("333333",6), bottom: bdr("333333",6), left: bdr("333333",6), right: bdr("333333",6) };
+
+    const cell = (lines, bold, center, shaded, italic) => {
+      const children = lines.map((l, i) =>
+        new Paragraph({
+          alignment: center ? AlignmentType.CENTER : AlignmentType.LEFT,
+          spacing: i < lines.length - 1 ? { after: 30 } : {},
+          children: [new TextRun({ text: l, bold: bold && i === 0, italics: italic, size: 17, font: "Arial", color: shaded ? "000000" : undefined })]
+        })
+      );
+      return new TableCell({
+        borders: shaded ? headBorders : cellBorders,
+        shading: shaded ? { fill: "DDDDDD", type: ShadingType.CLEAR } : {},
+        width: { size: 0, type: WidthType.AUTO },
+        margins: { top: 65, bottom: 65, left: 90, right: 90 },
+        verticalAlign: VerticalAlign.CENTER,
+        children
+      });
+    };
+
+    const hcell = (text) => cell(text.split("\n"), true, true, true, false);
+    const TW = dxa(17.6);
+
+    const rows = [
+      new TableRow({ tableHeader: true, children: [hcell("Data\n(1ª Chamada)"), hcell("Aulas\n(1ª Chamada)"), hcell("Matérias"), hcell("2ª\nChamada"), hcell("Horário\n(2ª Chamada)")] }),
+      new TableRow({ children: [cell(["27/02 (Sex)"],true,true), cell(["1ª, 2ª e 3ª aulas"],false,true,false,true), cell(["Simulado – Produção de Texto"]), cell(["06/03"],false,true), cell(["13h30 – 16h30"],false,true)] }),
+      new TableRow({ children: [cell(["16/03 (Seg)"],true,true), cell(["1ª e 2ª aulas"],false,true,false,true), cell(["Língua Portuguesa (Gramática e Literatura)","Sociologia"]), cell(["23/03"],false,true), cell(["13h30 – 15h10"],false,true)] }),
+      new TableRow({ children: [cell(["17/03 (Ter)"],true,true), cell(["1ª, 2ª e 3ª aulas"],false,true,false,true), cell(["Arte / Inglês / Química Eletiva"]), cell(["24/03"],false,true), cell(["13h30 – 16h00"],false,true)] }),
+      new TableRow({ children: [cell(["18/03 (Qua)"],true,true), cell(["1ª e 2ª aulas"],false,true,false,true), cell(["Geografia","Est. Orientado de Língua Portuguesa"]), cell(["25/03"],false,true), cell(["13h30 – 15h10"],false,true)] }),
+      new TableRow({ children: [cell(["19/03 (Qui)"],true,true), cell(["—"],false,true,false,true), cell(["Olimpíada Canguru"]), cell(["—"],false,true), cell(["—"],false,true)] }),
+      new TableRow({ children: [cell(["20/03 (Sex)"],true,true), cell(["1ª e 2ª aulas"],false,true,false,true), cell(["História","Química"]), cell(["26/03"],false,true), cell(["13h30 – 15h10"],false,true)] }),
+      new TableRow({ children: [cell(["23/03 (Seg)"],true,true), cell(["1ª e 2ª aulas"],false,true,false,true), cell(["Est. Orientado Matemática","Educação Física"]), cell(["27/03"],false,true), cell(["13h30 – 15h10"],false,true)] }),
+      new TableRow({ children: [cell(["24/03 (Ter)"],true,true), cell(["1ª e 2ª aulas"],false,true,false,true), cell(["Biologia","Física"]), cell(["30/03"],false,true), cell(["13h30 – 15h10"],false,true)] }),
+      new TableRow({ children: [cell(["25/03 (Qua)"],true,true), cell(["1ª, 2ª e 3ª aulas"],false,true,false,true), cell(["Filosofia / Matemática","Civismo e Cidadania"]), cell(["31/03"],false,true), cell(["13h30 – 16h00"],false,true)] }),
+      new TableRow({ children: [cell(["27/03 (Sex)"],true,true), cell(["2ª, 3ª, 4ª, 5ª e 6ª aulas"],false,true,false,true), cell(["Simulado – Conhecimentos Gerais"]), cell(["06/04"],false,true), cell(["13h30 – 16h30"],false,true)] }),
+    ];
+
+    const doc = new Document({
+      styles: { default: { document: { run: { font: "Arial", size: 20 } } } },
+      sections: [{
+        properties: {
+          page: {
+            size: { width: 11906, height: 16838 },
+            margin: { top: dxa(1.5), right: dxa(1.5), bottom: dxa(1.5), left: dxa(1.5) }
+          }
+        },
+        children: [
+          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 140 },
+            children: [new TextRun({ text: "HORÁRIO DE PROVAS — 2025", bold: true, size: 26, font: "Arial" })] }),
+          new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 280 },
+            children: [new TextRun({ text: "1ª e 2ª Chamada", size: 18, font: "Arial" })] }),
+          new Table({
+            width: { size: TW, type: WidthType.DXA },
+            columnWidths: [dxa(2.8), dxa(2.8), dxa(6.5), dxa(2.4), dxa(3.1)],
+            rows
+          }),
+          new Paragraph({ spacing: { before: 200 }, alignment: AlignmentType.CENTER,
+            children: [new TextRun({ text: "* Olimpíada Canguru não possui 2ª chamada.", size: 16, italics: true, font: "Arial", color: "666666" })] }),
+        ]
+      }]
+    });
+
+    const buffer = await Packer.toBuffer(doc);
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = "horario_provas.docx"; a.click();
+    URL.revokeObjectURL(url);
+
+  } catch(e) {
+    alert("Erro ao gerar o documento: " + e.message);
+    console.error(e);
+  } finally {
+    btn.innerHTML = original;
+    btn.style.opacity = '1';
+  }
+}
+</script>
+</body>
+</html>
